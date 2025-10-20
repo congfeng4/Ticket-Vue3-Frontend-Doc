@@ -9,802 +9,939 @@
             font-family: Arial, sans-serif;
             line-height: 1.6;
             margin: 0;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
+            padding: 0;
+            max-width: 100%;
+            display: flex;
         }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            background-color: #f5f5f5;
+            border-right: 1px solid #ddd;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            padding: 0 20px 10px;
+            margin: 0 0 15px;
+            border-bottom: 1px solid #ddd;
+            font-size: 1.2em;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            margin: 0;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 8px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: #e0e0e0;
+        }
+
+        .sidebar .submenu {
+            padding-left: 20px;
+            border-left: 2px solid #ddd;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 30px;
+            max-width: 900px;
+        }
+
         h1, h2, h3, h4 {
             color: #2c3e50;
             border-bottom: 1px solid #eee;
             padding-bottom: 8px;
+            scroll-margin-top: 20px; /* For smooth scrolling to section */
         }
+
         .section {
             margin-bottom: 30px;
         }
+
         .api-endpoint {
             background-color: #f8f9fa;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
         }
+
         .endpoint-method {
             font-weight: bold;
             color: #27ae60;
         }
+
         .endpoint-path {
             font-family: monospace;
             font-size: 1.1em;
             color: #3498db;
         }
+
         .schema-table {
             width: 100%;
             border-collapse: collapse;
             margin: 15px 0;
         }
+
         .schema-table th, .schema-table td {
             border: 1px solid #ddd;
             padding: 10px;
             text-align: left;
         }
+
         .schema-table th {
             background-color: #f2f2f2;
         }
+
         .type-definition {
             background-color: #f8f9fa;
             padding: 10px;
             border-radius: 5px;
-            font-family: monospace;
             margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .type-definition pre {
+            font-family: monospace;
+            margin: 0;
+            white-space: pre;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Ticketing System Backend Documentation</h1>
-    <p>This document outlines the required backend API endpoints, data models, and database schema to support the frontend ticketing system.</p>
-
-    <div class="section">
-        <h2>Data Models</h2>
-
-        <h3>User</h3>
-        <div class="type-definition">
-            interface User {
-                id: string;           // Unique identifier
-                username: string;     // Login username
-                fullName?: string;    // Full name (optional)
-                email?: string;       // Email address (optional)
-                role: Role;           // User role
-            }
-
-            type Role = 'TESTER' | 'DEVELOPER' | 'QA' | 'ADMIN';
-        </div>
-
-        <h3>Ticket</h3>
-        <div class="type-definition">
-            interface Ticket {
-                id: string;                   // Unique identifier
-                title: string;                // Ticket title
-                description: string;          // Detailed description
-                software_name: string;        // Name of affected software
-                software_version: string;     // Version of affected software
-                discovered_at: string;        // ISO timestamp when issue was discovered
-                severity: Severity;           // Issue severity
-                module?: string;              // Related module (optional)
-                current_status: TicketStatus; // Current workflow status
-                submitter?: User;             // User who submitted the ticket
-                assignee?: User;              // Assigned developer
-                qa_reviewer?: User;           // QA reviewer
-                regressor?: User;             // Tester responsible for regression
-                created_at?: string;          // ISO timestamp when ticket was created
-                updated_at?: string;          // ISO timestamp of last update
-            }
-
-            type Severity = 'HINT' | 'NORMAL' | 'SEVERE' | 'CRITICAL';
-
-            type TicketStatus =
-                | 'OPEN'
-                | 'IN_DEVELOPMENT'
-                | 'UNDER_REVIEW'
-                | 'IN_REGRESSION'
-                | 'CLOSED'
-                | 'IN_MODIFICATION'
-                | 'REOPENED';
-        </div>
-
-        <h3>Developer Report</h3>
-        <div class="type-definition">
-            interface DevReport {
-                issue_type: string;          // Type of issue identified
-                root_cause: string;          // Root cause analysis
-                self_test_report: string;    // Results of self-testing
-                regression_version: string;  // Version with fix
-                module: string;              // Module where fix was applied
-                github_pr_url: string;       // URL to related PR
-                screenshots?: File[];        // Screenshot attachments
-            }
-        </div>
-
-        <h3>QA Review</h3>
-        <div class="type-definition">
-            interface QAReview {
-                agree_to_release: boolean;   // Approve for release?
-                designated_tester?: User;    // Assigned regression tester
-                comments: string;            // QA comments
-            }
-        </div>
-
-        <h3>Regression Test</h3>
-        <div class="type-definition">
-            interface RegressionTest {
-                regression_version: string;  // Version tested
-                passed: boolean;             // Test passed?
-                report: string;              // Test results
-                screenshots?: File[];        // Test screenshots
-            }
-        </div>
-
-        <h3>Auth Response</h3>
-        <div class="type-definition">
-            interface AuthResponse {
-                token: string;               // Authentication token
-                user: User;                  // User information
-            }
-        </div>
-
-        <h3>AI Insights</h3>
-        <div class="type-definition">
-            interface AIInsights {
-                summary: string;             // Overall analysis summary
-                severity: Record<string, number>; // Severity distribution
-                modules: string[];           // Top modules with issues
-                suggestions: string[];       // Improvement suggestions
-            }
-        </div>
-    </div>
-
-    <div class="section">
-        <h2>Database Schema</h2>
-
-        <h3>users Table</h3>
-        <table class="schema-table">
-            <tr>
-                <th>Column</th>
-                <th>Type</th>
-                <th>Constraints</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>PK, NOT NULL</td>
-                <td>Unique user identifier</td>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>VARCHAR(50)</td>
-                <td>UNIQUE, NOT NULL</td>
-                <td>Login username</td>
-            </tr>
-            <tr>
-                <td>full_name</td>
-                <td>VARCHAR(100)</td>
-                <td>NULLABLE</td>
-                <td>User's full name</td>
-            </tr>
-            <tr>
-                <td>email</td>
-                <td>VARCHAR(100)</td>
-                <td>NULLABLE</td>
-                <td>Email address</td>
-            </tr>
-            <tr>
-                <td>role</td>
-                <td>ENUM</td>
-                <td>NOT NULL</td>
-                <td>Role: TESTER, DEVELOPER, QA, ADMIN</td>
-            </tr>
-            <tr>
-                <td>password_hash</td>
-                <td>VARCHAR(255)</td>
-                <td>NOT NULL</td>
-                <td>Hashed password</td>
-            </tr>
-        </table>
-
-        <h3>tickets Table</h3>
-        <table class="schema-table">
-            <tr>
-                <th>Column</th>
-                <th>Type</th>
-                <th>Constraints</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>PK, NOT NULL</td>
-                <td>Unique ticket identifier</td>
-            </tr>
-            <tr>
-                <td>title</td>
-                <td>VARCHAR(255)</td>
-                <td>NOT NULL</td>
-                <td>Ticket title</td>
-            </tr>
-            <tr>
-                <td>description</td>
-                <td>TEXT</td>
-                <td>NOT NULL</td>
-                <td>Detailed description</td>
-            </tr>
-            <tr>
-                <td>software_name</td>
-                <td>VARCHAR(100)</td>
-                <td>NOT NULL</td>
-                <td>Affected software name</td>
-            </tr>
-            <tr>
-                <td>software_version</td>
-                <td>VARCHAR(50)</td>
-                <td>NOT NULL</td>
-                <td>Affected software version</td>
-            </tr>
-            <tr>
-                <td>discovered_at</td>
-                <td>DATETIME</td>
-                <td>NOT NULL</td>
-                <td>When issue was discovered</td>
-            </tr>
-            <tr>
-                <td>severity</td>
-                <td>ENUM</td>
-                <td>NOT NULL</td>
-                <td>Severity: HINT, NORMAL, SEVERE, CRITICAL</td>
-            </tr>
-            <tr>
-                <td>module</td>
-                <td>VARCHAR(100)</td>
-                <td>NULLABLE</td>
-                <td>Related module</td>
-            </tr>
-            <tr>
-                <td>current_status</td>
-                <td>ENUM</td>
-                <td>NOT NULL</td>
-                <td>Ticket status</td>
-            </tr>
-            <tr>
-                <td>submitter_id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>FK → users.id, NULLABLE</td>
-                <td>Submitter ID</td>
-            </tr>
-            <tr>
-                <td>assignee_id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>FK → users.id, NULLABLE</td>
-                <td>Assigned developer ID</td>
-            </tr>
-            <tr>
-                <td>qa_reviewer_id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>FK → users.id, NULLABLE</td>
-                <td>QA reviewer ID</td>
-            </tr>
-            <tr>
-                <td>regressor_id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>FK → users.id, NULLABLE</td>
-                <td>Regression tester ID</td>
-            </tr>
-            <tr>
-                <td>created_at</td>
-                <td>DATETIME</td>
-                <td>NOT NULL</td>
-                <td>Creation timestamp</td>
-            </tr>
-            <tr>
-                <td>updated_at</td>
-                <td>DATETIME</td>
-                <td>NOT NULL</td>
-                <td>Last update timestamp</td>
-            </tr>
-        </table>
-
-        <h3>ticket_attachments Table</h3>
-        <table class="schema-table">
-            <tr>
-                <th>Column</th>
-                <th>Type</th>
-                <th>Constraints</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>PK, NOT NULL</td>
-                <td>Unique attachment ID</td>
-            </tr>
-            <tr>
-                <td>ticket_id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>FK → tickets.id, NOT NULL</td>
-                <td>Associated ticket</td>
-            </tr>
-            <tr>
-                <td>file_name</td>
-                <td>VARCHAR(255)</td>
-                <td>NOT NULL</td>
-                <td>Original filename</td>
-            </tr>
-            <tr>
-                <td>file_path</td>
-                <td>VARCHAR(512)</td>
-                <td>NOT NULL</td>
-                <td>Storage path</td>
-            </tr>
-            <tr>
-                <td>file_type</td>
-                <td>VARCHAR(100)</td>
-                <td>NOT NULL</td>
-                <td>MIME type</td>
-            </tr>
-            <tr>
-                <td>uploaded_by</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>FK → users.id, NOT NULL</td>
-                <td>User who uploaded</td>
-            </tr>
-            <tr>
-                <td>uploaded_at</td>
-                <td>DATETIME</td>
-                <td>NOT NULL</td>
-                <td>Upload timestamp</td>
-            </tr>
-        </table>
-
-        <h3>dev_reports Table</h3>
-        <table class="schema-table">
-            <tr>
-                <th>Column</th>
-                <th>Type</th>
-                <th>Constraints</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>PK, NOT NULL</td>
-                <td>Report ID</td>
-            </tr>
-            <tr>
-                <td>ticket_id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>FK → tickets.id, NOT NULL</td>
-                <td>Associated ticket</td>
-            </tr>
-            <tr>
-                <td>issue_type</td>
-                <td>VARCHAR(100)</td>
-                <td>NOT NULL</td>
-                <td>Type of issue</td>
-            </tr>
-            <tr>
-                <td>root_cause</td>
-                <td>TEXT</td>
-                <td>NOT NULL</td>
-                <td>Root cause analysis</td>
-            </tr>
-            <tr>
-                <td>self_test_report</td>
-                <td>TEXT</td>
-                <td>NOT NULL</td>
-                <td>Self-test results</td>
-            </tr>
-            <tr>
-                <td>regression_version</td>
-                <td>VARCHAR(50)</td>
-                <td>NOT NULL</td>
-                <td>Version with fix</td>
-            </tr>
-            <tr>
-                <td>module</td>
-                <td>VARCHAR(100)</td>
-                <td>NOT NULL</td>
-                <td>Affected module</td>
-            </tr>
-            <tr>
-                <td>github_pr_url</td>
-                <td>VARCHAR(255)</td>
-                <td>NULLABLE</td>
-                <td>PR URL</td>
-            </tr>
-            <tr>
-                <td>submitted_at</td>
-                <td>DATETIME</td>
-                <td>NOT NULL</td>
-                <td>Submission timestamp</td>
-            </tr>
-        </table>
-
-        <h3>qa_reviews Table</h3>
-        <table class="schema-table">
-            <tr>
-                <th>Column</th>
-                <th>Type</th>
-                <th>Constraints</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>PK, NOT NULL</td>
-                <td>Review ID</td>
-            </tr>
-            <tr>
-                <td>ticket_id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>FK → tickets.id, NOT NULL</td>
-                <td>Associated ticket</td>
-            </tr>
-            <tr>
-                <td>agree_to_release</td>
-                <td>BOOLEAN</td>
-                <td>NOT NULL</td>
-                <td>Approval status</td>
-            </tr>
-            <tr>
-                <td>designated_tester_id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>FK → users.id, NULLABLE</td>
-                <td>Assigned tester</td>
-            </tr>
-            <tr>
-                <td>comments</td>
-                <td>TEXT</td>
-                <td>NOT NULL</td>
-                <td>QA comments</td>
-            </tr>
-            <tr>
-                <td>submitted_at</td>
-                <td>DATETIME</td>
-                <td>NOT NULL</td>
-                <td>Submission timestamp</td>
-            </tr>
-        </table>
-
-        <h3>regression_tests Table</h3>
-        <table class="schema-table">
-            <tr>
-                <th>Column</th>
-                <th>Type</th>
-                <th>Constraints</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>PK, NOT NULL</td>
-                <td>Test ID</td>
-            </tr>
-            <tr>
-                <td>ticket_id</td>
-                <td>UUID/VARCHAR(36)</td>
-                <td>FK → tickets.id, NOT NULL</td>
-                <td>Associated ticket</td>
-            </tr>
-            <tr>
-                <td>regression_version</td>
-                <td>VARCHAR(50)</td>
-                <td>NOT NULL</td>
-                <td>Version tested</td>
-            </tr>
-            <tr>
-                <td>passed</td>
-                <td>BOOLEAN</td>
-                <td>NOT NULL</td>
-                <td>Test result</td>
-            </tr>
-            <tr>
-                <td>report</td>
-                <td>TEXT</td>
-                <td>NOT NULL</td>
-                <td>Test report</td>
-            </tr>
-            <tr>
-                <td>submitted_at</td>
-                <td>DATETIME</td>
-                <td>NOT NULL</td>
-                <td>Submission timestamp</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="section">
-        <h2>API Endpoints</h2>
-        <p>All endpoints are relative to the base URL: <code>/api</code></p>
-
-        <h3>Authentication</h3>
-
-        <div class="api-endpoint">
-            <div class="endpoint-method">POST</div>
-            <div class="endpoint-path">/auth/login</div>
-            <h4>Description</h4>
-            <p>Authenticates a user and returns a token with user information</p>
-
-            <h4>Request Body</h4>
-            <div class="type-definition">
-                {
-                    username: string;  // User's username
-                    password: string;  // User's password
-                }
-            </div>
-
-            <h4>Response (200 OK)</h4>
-            <div class="type-definition">
-                AuthResponse {
-                    token: string;  // JWT or similar auth token
-                    user: User;     // User object
-                }
-            </div>
-
-            <h4>Error Response (401 Unauthorized)</h4>
-            <div class="type-definition">
-                {
-                    message: string;  // "Invalid credentials" or similar
-                }
-            </div>
-        </div>
-
-        <h3>Users</h3>
-
-        <div class="api-endpoint">
-            <div class="endpoint-method">GET</div>
-            <div class="endpoint-path">/users</div>
-            <h4>Description</h4>
-            <p>Returns a list of all users</p>
-
-            <h4>Headers</h4>
-            <div class="type-definition">
-                Authorization: Bearer {token}  // Required for authentication
-            </div>
-
-            <h4>Response (200 OK)</h4>
-            <div class="type-definition">
-                User[]  // Array of user objects
-            </div>
-        </div>
-
-        <h3>Tickets</h3>
-
-        <div class="api-endpoint">
-            <div class="endpoint-method">GET</div>
-            <div class="endpoint-path">/tickets</div>
-            <h4>Description</h4>
-            <p>Returns a list of tickets with optional filtering</p>
-
-            <h4>Headers</h4>
-            <div class="type-definition">
-                Authorization: Bearer {token}  // Required for authentication
-            </div>
-
-            <h4>Query Parameters</h4>
-            <div class="type-definition">
-                {
-                    status?: TicketStatus;  // Filter by status
-                    severity?: Severity;    // Filter by severity
-                    assignee?: string;      // Filter by assignee ID
-                    // Other filters as needed
-                }
-            </div>
-
-            <h4>Response (200 OK)</h4>
-            <div class="type-definition">
-                Ticket[]  // Array of ticket objects
-            </div>
-        </div>
-
-        <div class="api-endpoint">
-            <div class="endpoint-method">GET</div>
-            <div class="endpoint-path">/tickets/:id</div>
-            <h4>Description</h4>
-            <p>Returns a single ticket by ID</p>
-
-            <h4>Headers</h4>
-            <div class="type-definition">
-                Authorization: Bearer {token}  // Required for authentication
-            </div>
-
-            <h4>URL Parameters</h4>
-            <div class="type-definition">
-                id: string  // Ticket ID
-            </div>
-
-            <h4>Response (200 OK)</h4>
-            <div class="type-definition">
-                Ticket  // Ticket object
-            </div>
-
-            <h4>Error Response (404 Not Found)</h4>
-            <div class="type-definition">
-                {
-                    message: string;  // "Ticket not found"
-                }
-            </div>
-        </div>
-
-        <div class="api-endpoint">
-            <div class="endpoint-method">POST</div>
-            <div class="endpoint-path">/tickets</div>
-            <h4>Description</h4>
-            <p>Creates a new ticket</p>
-
-            <h4>Headers</h4>
-            <div class="type-definition">
-                Authorization: Bearer {token}  // Required for authentication
-                Content-Type: multipart/form-data  // For file uploads
-            </div>
-
-            <h4>Request Body</h4>
-            <div class="type-definition">
-                {
-                    title: string;
-                    software_name: string;
-                    software_version: string;
-                    discovered_at: string;  // ISO timestamp
-                    severity: Severity;
-                    module?: string;
-                    assignee?: User;
-                    description: string;
-                    submitter: User;
-                    attachments?: File[];  // Optional file attachments
-                }
-            </div>
-
-            <h4>Response (201 Created)</h4>
-            <div class="type-definition">
-                Ticket  // Created ticket object
-            </div>
-        </div>
-
-        <h3>Developer Reports</h3>
-
-        <div class="api-endpoint">
-            <div class="endpoint-method">POST</div>
-            <div class="endpoint-path">/tickets/:id/dev-report</div>
-            <h4>Description</h4>
-            <p>Submits a developer report for a ticket</p>
-
-            <h4>Headers</h4>
-            <div class="type-definition">
-                Authorization: Bearer {token}  // Required for authentication
-                Content-Type: multipart/form-data  // For file uploads
-            </div>
-
-            <h4>URL Parameters</h4>
-            <div class="type-definition">
-                id: string  // Ticket ID
-            </div>
-
-            <h4>Request Body</h4>
-            <div class="type-definition">
-                DevReport  // Developer report object
-            </div>
-
-            <h4>Response (200 OK)</h4>
-            <div class="type-definition">
-                Ticket  // Updated ticket object
-            </div>
-        </div>
-
-        <h3>QA Reviews</h3>
-
-        <div class="api-endpoint">
-            <div class="endpoint-method">POST</div>
-            <div class="endpoint-path">/tickets/:id/qa-review</div>
-            <h4>Description</h4>
-            <p>Submits a QA review for a ticket</p>
-
-            <h4>Headers</h4>
-            <div class="type-definition">
-                Authorization: Bearer {token}  // Required for authentication
-            </div>
-
-            <h4>URL Parameters</h4>
-            <div class="type-definition">
-                id: string  // Ticket ID
-            </div>
-
-            <h4>Request Body</h4>
-            <div class="type-definition">
-                QAReview  // QA review object
-            </div>
-
-            <h4>Response (200 OK)</h4>
-            <div class="type-definition">
-                Ticket  // Updated ticket object
-            </div>
-        </div>
-
-        <h3>Regression Tests</h3>
-
-        <div class="api-endpoint">
-            <div class="endpoint-method">POST</div>
-            <div class="endpoint-path">/tickets/:id/regression</div>
-            <h4>Description</h4>
-            <p>Submits regression test results for a ticket</p>
-
-            <h4>Headers</h4>
-            <div class="type-definition">
-                Authorization: Bearer {token}  // Required for authentication
-                Content-Type: multipart/form-data  // For file uploads
-            </div>
-
-            <h4>URL Parameters</h4>
-            <div class="type-definition">
-                id: string  // Ticket ID
-            </div>
-
-            <h4>Request Body</h4>
-            <div class="type-definition">
-                RegressionTest  // Regression test object
-            </div>
-
-            <h4>Response (200 OK)</h4>
-            <div class="type-definition">
-                Ticket  // Updated ticket object
-            </div>
-        </div>
-
-        <h3>AI Insights</h3>
-
-        <div class="api-endpoint">
-            <div class="endpoint-method">GET</div>
-            <div class="endpoint-path">/insights</div>
-            <h4>Description</h4>
-            <p>Returns AI-generated insights and analytics</p>
-
-            <h4>Headers</h4>
-            <div class="type-definition">
-                Authorization: Bearer {token}  // Required for authentication
-            </div>
-
-            <h4>Query Parameters</h4>
-            <div class="type-definition">
-                {
-                    start?: string;  // ISO start date
-                    end?: string;    // ISO end date
-                }
-            </div>
-
-            <h4>Response (200 OK)</h4>
-            <div class="type-definition">
-                AIInsights  // Insights object
-            </div>
-        </div>
-    </div>
-
-    <div class="section">
-        <h2>Authentication & Authorization</h2>
-        <p>All API endpoints (except login) require authentication via a bearer token in the Authorization header.</p>
-        <p>Authorization should be role-based:</p>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <h2>Table of Contents</h2>
         <ul>
-            <li>TESTER: Can create tickets and submit regression tests</li>
-            <li>DEVELOPER: Can view tickets, submit developer reports</li>
-            <li>QA: Can view tickets, submit QA reviews</li>
-            <li>ADMIN: Full access to all functionality</li>
+            <li><a href="#introduction">Introduction</a></li>
+            <li>
+                <a href="#data-models">Data Models</a>
+                <ul class="submenu">
+                    <li><a href="#user-model">User</a></li>
+                    <li><a href="#ticket-model">Ticket</a></li>
+                    <li><a href="#dev-report-model">Developer Report</a></li>
+                    <li><a href="#qa-review-model">QA Review</a></li>
+                    <li><a href="#regression-test-model">Regression Test</a></li>
+                    <li><a href="#auth-response-model">Auth Response</a></li>
+                    <li><a href="#ai-insights-model">AI Insights</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#database-schema">Database Schema</a>
+                <ul class="submenu">
+                    <li><a href="#users-table">users Table</a></li>
+                    <li><a href="#tickets-table">tickets Table</a></li>
+                    <li><a href="#ticket-attachments-table">ticket_attachments Table</a></li>
+                    <li><a href="#dev-reports-table">dev_reports Table</a></li>
+                    <li><a href="#qa-reviews-table">qa_reviews Table</a></li>
+                    <li><a href="#regression-tests-table">regression_tests Table</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#api-endpoints">API Endpoints</a>
+                <ul class="submenu">
+                    <li><a href="#authentication-endpoints">Authentication</a></li>
+                    <li><a href="#users-endpoints">Users</a></li>
+                    <li><a href="#tickets-endpoints">Tickets</a></li>
+                    <li><a href="#developer-reports-endpoints">Developer Reports</a></li>
+                    <li><a href="#qa-reviews-endpoints">QA Reviews</a></li>
+                    <li><a href="#regression-tests-endpoints">Regression Tests</a></li>
+                    <li><a href="#ai-insights-endpoints">AI Insights</a></li>
+                </ul>
+            </li>
+            <li><a href="#authentication-authorization">Authentication & Authorization</a></li>
+            <li><a href="#file-uploads">File Uploads</a></li>
         </ul>
-    </div>
+    </nav>
 
-    <div class="section">
-        <h2>File Uploads</h2>
-        <p>Endpoints that accept file uploads (ticket creation, developer reports, regression tests) should:</p>
-        <ul>
-            <li>Accept multipart/form-data content type</li>
-            <li>Validate file types (recommended: images only)</li>
-            <li>Limit file sizes (recommended: 5MB max per file)</li>
-            <li>Store files securely with unique filenames</li>
-            <li>Return appropriate URLs/paths for accessing uploaded files</li>
-        </ul>
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 id="introduction">Ticketing System Backend Documentation</h1>
+        <p>This document outlines the required backend API endpoints, data models, and database schema to support the frontend ticketing system.</p>
+
+        <div class="section">
+            <h2 id="data-models">Data Models</h2>
+
+            <h3 id="user-model">User</h3>
+            <div class="type-definition">
+                <pre>interface User {
+    id: string;           // Unique identifier
+    username: string;     // Login username
+    fullName?: string;    // Full name (optional)
+    email?: string;       // Email address (optional)
+    role: Role;           // User role
+}
+
+type Role = 'TESTER' | 'DEVELOPER' | 'QA' | 'ADMIN';</pre>
+            </div>
+
+            <h3 id="ticket-model">Ticket</h3>
+            <div class="type-definition">
+                <pre>interface Ticket {
+    id: string;                   // Unique identifier
+    title: string;                // Ticket title
+    description: string;          // Detailed description
+    software_name: string;        // Name of affected software
+    software_version: string;     // Version of affected software
+    discovered_at: string;        // ISO timestamp when issue was discovered
+    severity: Severity;           // Issue severity
+    module?: string;              // Related module (optional)
+    current_status: TicketStatus; // Current workflow status
+    submitter?: User;             // User who submitted the ticket
+    assignee?: User;              // Assigned developer
+    qa_reviewer?: User;           // QA reviewer
+    regressor?: User;             // Tester responsible for regression
+    created_at?: string;          // ISO timestamp when ticket was created
+    updated_at?: string;          // ISO timestamp of last update
+}
+
+type Severity = 'HINT' | 'NORMAL' | 'SEVERE' | 'CRITICAL';
+
+type TicketStatus =
+    | 'OPEN'
+    | 'IN_DEVELOPMENT'
+    | 'UNDER_REVIEW'
+    | 'IN_REGRESSION'
+    | 'CLOSED'
+    | 'IN_MODIFICATION'
+    | 'REOPENED';</pre>
+            </div>
+
+            <h3 id="dev-report-model">Developer Report</h3>
+            <div class="type-definition">
+                <pre>interface DevReport {
+    issue_type: string;          // Type of issue identified
+    root_cause: string;          // Root cause analysis
+    self_test_report: string;    // Results of self-testing
+    regression_version: string;  // Version with fix
+    module: string;              // Module where fix was applied
+    github_pr_url: string;       // URL to related PR
+    screenshots?: File[];        // Screenshot attachments
+}</pre>
+            </div>
+
+            <h3 id="qa-review-model">QA Review</h3>
+            <div class="type-definition">
+                <pre>interface QAReview {
+    agree_to_release: boolean;   // Approve for release?
+    designated_tester?: User;    // Assigned regression tester
+    comments: string;            // QA comments
+}</pre>
+            </div>
+
+            <h3 id="regression-test-model">Regression Test</h3>
+            <div class="type-definition">
+                <pre>interface RegressionTest {
+    regression_version: string;  // Version tested
+    passed: boolean;             // Test passed?
+    report: string;              // Test results
+    screenshots?: File[];        // Test screenshots
+}</pre>
+            </div>
+
+            <h3 id="auth-response-model">Auth Response</h3>
+            <div class="type-definition">
+                <pre>interface AuthResponse {
+    token: string;               // Authentication token
+    user: User;                  // User information
+}</pre>
+            </div>
+
+            <h3 id="ai-insights-model">AI Insights</h3>
+            <div class="type-definition">
+                <pre>interface AIInsights {
+    summary: string;             // Overall analysis summary
+    severity: Record<string, number>; // Severity distribution
+    modules: string[];           // Top modules with issues
+    suggestions: string[];       // Improvement suggestions
+}</pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 id="database-schema">Database Schema</h2>
+
+            <h3 id="users-table">users Table</h3>
+            <table class="schema-table">
+                <tr>
+                    <th>Column</th>
+                    <th>Type</th>
+                    <th>Constraints</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>PK, NOT NULL</td>
+                    <td>Unique user identifier</td>
+                </tr>
+                <tr>
+                    <td>username</td>
+                    <td>VARCHAR(50)</td>
+                    <td>UNIQUE, NOT NULL</td>
+                    <td>Login username</td>
+                </tr>
+                <tr>
+                    <td>full_name</td>
+                    <td>VARCHAR(100)</td>
+                    <td>NULLABLE</td>
+                    <td>User's full name</td>
+                </tr>
+                <tr>
+                    <td>email</td>
+                    <td>VARCHAR(100)</td>
+                    <td>NULLABLE</td>
+                    <td>Email address</td>
+                </tr>
+                <tr>
+                    <td>role</td>
+                    <td>ENUM</td>
+                    <td>NOT NULL</td>
+                    <td>Role: TESTER, DEVELOPER, QA, ADMIN</td>
+                </tr>
+                <tr>
+                    <td>password_hash</td>
+                    <td>VARCHAR(255)</td>
+                    <td>NOT NULL</td>
+                    <td>Hashed password</td>
+                </tr>
+            </table>
+
+            <h3 id="tickets-table">tickets Table</h3>
+            <table class="schema-table">
+                <tr>
+                    <th>Column</th>
+                    <th>Type</th>
+                    <th>Constraints</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>PK, NOT NULL</td>
+                    <td>Unique ticket identifier</td>
+                </tr>
+                <tr>
+                    <td>title</td>
+                    <td>VARCHAR(255)</td>
+                    <td>NOT NULL</td>
+                    <td>Ticket title</td>
+                </tr>
+                <tr>
+                    <td>description</td>
+                    <td>TEXT</td>
+                    <td>NOT NULL</td>
+                    <td>Detailed description</td>
+                </tr>
+                <tr>
+                    <td>software_name</td>
+                    <td>VARCHAR(100)</td>
+                    <td>NOT NULL</td>
+                    <td>Affected software name</td>
+                </tr>
+                <tr>
+                    <td>software_version</td>
+                    <td>VARCHAR(50)</td>
+                    <td>NOT NULL</td>
+                    <td>Affected software version</td>
+                </tr>
+                <tr>
+                    <td>discovered_at</td>
+                    <td>DATETIME</td>
+                    <td>NOT NULL</td>
+                    <td>When issue was discovered</td>
+                </tr>
+                <tr>
+                    <td>severity</td>
+                    <td>ENUM</td>
+                    <td>NOT NULL</td>
+                    <td>Severity: HINT, NORMAL, SEVERE, CRITICAL</td>
+                </tr>
+                <tr>
+                    <td>module</td>
+                    <td>VARCHAR(100)</td>
+                    <td>NULLABLE</td>
+                    <td>Related module</td>
+                </tr>
+                <tr>
+                    <td>current_status</td>
+                    <td>ENUM</td>
+                    <td>NOT NULL</td>
+                    <td>Ticket status</td>
+                </tr>
+                <tr>
+                    <td>submitter_id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>FK → users.id, NULLABLE</td>
+                    <td>Submitter ID</td>
+                </tr>
+                <tr>
+                    <td>assignee_id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>FK → users.id, NULLABLE</td>
+                    <td>Assigned developer ID</td>
+                </tr>
+                <tr>
+                    <td>qa_reviewer_id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>FK → users.id, NULLABLE</td>
+                    <td>QA reviewer ID</td>
+                </tr>
+                <tr>
+                    <td>regressor_id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>FK → users.id, NULLABLE</td>
+                    <td>Regression tester ID</td>
+                </tr>
+                <tr>
+                    <td>created_at</td>
+                    <td>DATETIME</td>
+                    <td>NOT NULL</td>
+                    <td>Creation timestamp</td>
+                </tr>
+                <tr>
+                    <td>updated_at</td>
+                    <td>DATETIME</td>
+                    <td>NOT NULL</td>
+                    <td>Last update timestamp</td>
+                </tr>
+            </table>
+
+            <h3 id="ticket-attachments-table">ticket_attachments Table</h3>
+            <table class="schema-table">
+                <tr>
+                    <th>Column</th>
+                    <th>Type</th>
+                    <th>Constraints</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>PK, NOT NULL</td>
+                    <td>Unique attachment ID</td>
+                </tr>
+                <tr>
+                    <td>ticket_id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>FK → tickets.id, NOT NULL</td>
+                    <td>Associated ticket</td>
+                </tr>
+                <tr>
+                    <td>file_name</td>
+                    <td>VARCHAR(255)</td>
+                    <td>NOT NULL</td>
+                    <td>Original filename</td>
+                </tr>
+                <tr>
+                    <td>file_path</td>
+                    <td>VARCHAR(512)</td>
+                    <td>NOT NULL</td>
+                    <td>Storage path</td>
+                </tr>
+                <tr>
+                    <td>file_type</td>
+                    <td>VARCHAR(100)</td>
+                    <td>NOT NULL</td>
+                    <td>MIME type</td>
+                </tr>
+                <tr>
+                    <td>uploaded_by</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>FK → users.id, NOT NULL</td>
+                    <td>User who uploaded</td>
+                </tr>
+                <tr>
+                    <td>uploaded_at</td>
+                    <td>DATETIME</td>
+                    <td>NOT NULL</td>
+                    <td>Upload timestamp</td>
+                </tr>
+            </table>
+
+            <h3 id="dev-reports-table">dev_reports Table</h3>
+            <table class="schema-table">
+                <tr>
+                    <th>Column</th>
+                    <th>Type</th>
+                    <th>Constraints</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>PK, NOT NULL</td>
+                    <td>Report ID</td>
+                </tr>
+                <tr>
+                    <td>ticket_id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>FK → tickets.id, NOT NULL</td>
+                    <td>Associated ticket</td>
+                </tr>
+                <tr>
+                    <td>issue_type</td>
+                    <td>VARCHAR(100)</td>
+                    <td>NOT NULL</td>
+                    <td>Type of issue</td>
+                </tr>
+                <tr>
+                    <td>root_cause</td>
+                    <td>TEXT</td>
+                    <td>NOT NULL</td>
+                    <td>Root cause analysis</td>
+                </tr>
+                <tr>
+                    <td>self_test_report</td>
+                    <td>TEXT</td>
+                    <td>NOT NULL</td>
+                    <td>Self-test results</td>
+                </tr>
+                <tr>
+                    <td>regression_version</td>
+                    <td>VARCHAR(50)</td>
+                    <td>NOT NULL</td>
+                    <td>Version with fix</td>
+                </tr>
+                <tr>
+                    <td>module</td>
+                    <td>VARCHAR(100)</td>
+                    <td>NOT NULL</td>
+                    <td>Affected module</td>
+                </tr>
+                <tr>
+                    <td>github_pr_url</td>
+                    <td>VARCHAR(255)</td>
+                    <td>NULLABLE</td>
+                    <td>PR URL</td>
+                </tr>
+                <tr>
+                    <td>submitted_at</td>
+                    <td>DATETIME</td>
+                    <td>NOT NULL</td>
+                    <td>Submission timestamp</td>
+                </tr>
+            </table>
+
+            <h3 id="qa-reviews-table">qa_reviews Table</h3>
+            <table class="schema-table">
+                <tr>
+                    <th>Column</th>
+                    <th>Type</th>
+                    <th>Constraints</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>PK, NOT NULL</td>
+                    <td>Review ID</td>
+                </tr>
+                <tr>
+                    <td>ticket_id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>FK → tickets.id, NOT NULL</td>
+                    <td>Associated ticket</td>
+                </tr>
+                <tr>
+                    <td>agree_to_release</td>
+                    <td>BOOLEAN</td>
+                    <td>NOT NULL</td>
+                    <td>Approval status</td>
+                </tr>
+                <tr>
+                    <td>designated_tester_id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>FK → users.id, NULLABLE</td>
+                    <td>Assigned tester</td>
+                </tr>
+                <tr>
+                    <td>comments</td>
+                    <td>TEXT</td>
+                    <td>NOT NULL</td>
+                    <td>QA comments</td>
+                </tr>
+                <tr>
+                    <td>submitted_at</td>
+                    <td>DATETIME</td>
+                    <td>NOT NULL</td>
+                    <td>Submission timestamp</td>
+                </tr>
+            </table>
+
+            <h3 id="regression-tests-table">regression_tests Table</h3>
+            <table class="schema-table">
+                <tr>
+                    <th>Column</th>
+                    <th>Type</th>
+                    <th>Constraints</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>PK, NOT NULL</td>
+                    <td>Test ID</td>
+                </tr>
+                <tr>
+                    <td>ticket_id</td>
+                    <td>UUID/VARCHAR(36)</td>
+                    <td>FK → tickets.id, NOT NULL</td>
+                    <td>Associated ticket</td>
+                </tr>
+                <tr>
+                    <td>regression_version</td>
+                    <td>VARCHAR(50)</td>
+                    <td>NOT NULL</td>
+                    <td>Version tested</td>
+                </tr>
+                <tr>
+                    <td>passed</td>
+                    <td>BOOLEAN</td>
+                    <td>NOT NULL</td>
+                    <td>Test result</td>
+                </tr>
+                <tr>
+                    <td>report</td>
+                    <td>TEXT</td>
+                    <td>NOT NULL</td>
+                    <td>Test report</td>
+                </tr>
+                <tr>
+                    <td>submitted_at</td>
+                    <td>DATETIME</td>
+                    <td>NOT NULL</td>
+                    <td>Submission timestamp</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2 id="api-endpoints">API Endpoints</h2>
+            <p>All endpoints are relative to the base URL: <code>/api</code></p>
+
+            <h3 id="authentication-endpoints">Authentication</h3>
+
+            <div class="api-endpoint">
+                <div class="endpoint-method">POST</div>
+                <div class="endpoint-path">/auth/login</div>
+                <h4>Description</h4>
+                <p>Authenticates a user and returns a token with user information</p>
+
+                <h4>Request Body</h4>
+                <div class="type-definition">
+                    <pre>{
+    username: string;  // User's username
+    password: string;  // User's password
+}</pre>
+                </div>
+
+                <h4>Response (200 OK)</h4>
+                <div class="type-definition">
+                    <pre>AuthResponse {
+    token: string;  // JWT or similar auth token
+    user: User;     // User object
+}</pre>
+                </div>
+
+                <h4>Error Response (401 Unauthorized)</h4>
+                <div class="type-definition">
+                    <pre>{
+    message: string;  // "Invalid credentials" or similar
+}</pre>
+                </div>
+            </div>
+
+            <h3 id="users-endpoints">Users</h3>
+
+            <div class="api-endpoint">
+                <div class="endpoint-method">GET</div>
+                <div class="endpoint-path">/users</div>
+                <h4>Description</h4>
+                <p>Returns a list of all users</p>
+
+                <h4>Headers</h4>
+                <div class="type-definition">
+                    <pre>Authorization: Bearer {token}  // Required for authentication</pre>
+                </div>
+
+                <h4>Response (200 OK)</h4>
+                <div class="type-definition">
+                    <pre>User[]  // Array of user objects</pre>
+                </div>
+            </div>
+
+            <h3 id="tickets-endpoints">Tickets</h3>
+
+            <div class="api-endpoint">
+                <div class="endpoint-method">GET</div>
+                <div class="endpoint-path">/tickets</div>
+                <h4>Description</h4>
+                <p>Returns a list of tickets with optional filtering</p>
+
+                <h4>Headers</h4>
+                <div class="type-definition">
+                    <pre>Authorization: Bearer {token}  // Required for authentication</pre>
+                </div>
+
+                <h4>Query Parameters</h4>
+                <div class="type-definition">
+                    <pre>{
+    status?: TicketStatus;  // Filter by status
+    severity?: Severity;    // Filter by severity
+    assignee?: string;      // Filter by assignee ID
+    // Other filters as needed
+}</pre>
+                </div>
+
+                <h4>Response (200 OK)</h4>
+                <div class="type-definition">
+                    <pre>Ticket[]  // Array of ticket objects</pre>
+                </div>
+            </div>
+
+            <div class="api-endpoint">
+                <div class="endpoint-method">GET</div>
+                <div class="endpoint-path">/tickets/:id</div>
+                <h4>Description</h4>
+                <p>Returns a single ticket by ID</p>
+
+                <h4>Headers</h4>
+                <div class="type-definition">
+                    <pre>Authorization: Bearer {token}  // Required for authentication</pre>
+                </div>
+
+                <h4>URL Parameters</h4>
+                <div class="type-definition">
+                    <pre>id: string  // Ticket ID</pre>
+                </div>
+
+                <h4>Response (200 OK)</h4>
+                <div class="type-definition">
+                    <pre>Ticket  // Ticket object</pre>
+                </div>
+
+                <h4>Error Response (404 Not Found)</h4>
+                <div class="type-definition">
+                    <pre>{
+    message: string;  // "Ticket not found"
+}</pre>
+                </div>
+            </div>
+
+            <div class="api-endpoint">
+                <div class="endpoint-method">POST</div>
+                <div class="endpoint-path">/tickets</div>
+                <h4>Description</h4>
+                <p>Creates a new ticket</p>
+
+                <h4>Headers</h4>
+                <div class="type-definition">
+                    <pre>Authorization: Bearer {token}  // Required for authentication
+Content-Type: multipart/form-data  // For file uploads</pre>
+                </div>
+
+                <h4>Request Body</h4>
+                <div class="type-definition">
+                    <pre>{
+    title: string;
+    software_name: string;
+    software_version: string;
+    discovered_at: string;  // ISO timestamp
+    severity: Severity;
+    module?: string;
+    assignee?: User;
+    description: string;
+    submitter: User;
+    attachments?: File[];  // Optional file attachments
+}</pre>
+                </div>
+
+                <h4>Response (201 Created)</h4>
+                <div class="type-definition">
+                    <pre>Ticket  // Created ticket object</pre>
+                </div>
+            </div>
+
+            <h3 id="developer-reports-endpoints">Developer Reports</h3>
+
+            <div class="api-endpoint">
+                <div class="endpoint-method">POST</div>
+                <div class="endpoint-path">/tickets/:id/dev-report</div>
+                <h4>Description</h4>
+                <p>Submits a developer report for a ticket</p>
+
+                <h4>Headers</h4>
+                <div class="type-definition">
+                    <pre>Authorization: Bearer {token}  // Required for authentication
+Content-Type: multipart/form-data  // For file uploads</pre>
+                </div>
+
+                <h4>URL Parameters</h4>
+                <div class="type-definition">
+                    <pre>id: string  // Ticket ID</pre>
+                </div>
+
+                <h4>Request Body</h4>
+                <div class="type-definition">
+                    <pre>DevReport  // Developer report object</pre>
+                </div>
+
+                <h4>Response (200 OK)</h4>
+                <div class="type-definition">
+                    <pre>Ticket  // Updated ticket object</pre>
+                </div>
+            </div>
+
+            <h3 id="qa-reviews-endpoints">QA Reviews</h3>
+
+            <div class="api-endpoint">
+                <div class="endpoint-method">POST</div>
+                <div class="endpoint-path">/tickets/:id/qa-review</div>
+                <h4>Description</h4>
+                <p>Submits a QA review for a ticket</p>
+
+                <h4>Headers</h4>
+                <div class="type-definition">
+                    <pre>Authorization: Bearer {token}  // Required for authentication</pre>
+                </div>
+
+                <h4>URL Parameters</h4>
+                <div class="type-definition">
+                    <pre>id: string  // Ticket ID</pre>
+                </div>
+
+                <h4>Request Body</h4>
+                <div class="type-definition">
+                    <pre>QAReview  // QA review object</pre>
+                </div>
+
+                <h4>Response (200 OK)</h4>
+                <div class="type-definition">
+                    <pre>Ticket  // Updated ticket object</pre>
+                </div>
+            </div>
+
+            <h3 id="regression-tests-endpoints">Regression Tests</h3>
+
+            <div class="api-endpoint">
+                <div class="endpoint-method">POST</div>
+                <div class="endpoint-path">/tickets/:id/regression</div>
+                <h4>Description</h4>
+                <p>Submits regression test results for a ticket</p>
+
+                <h4>Headers</h4>
+                <div class="type-definition">
+                    <pre>Authorization: Bearer {token}  // Required for authentication
+Content-Type: multipart/form-data  // For file uploads</pre>
+                </div>
+
+                <h4>URL Parameters</h4>
+                <div class="type-definition">
+                    <pre>id: string  // Ticket ID</pre>
+                </div>
+
+                <h4>Request Body</h4>
+                <div class="type-definition">
+                    <pre>RegressionTest  // Regression test object</pre>
+                </div>
+
+                <h4>Response (200 OK)</h4>
+                <div class="type-definition">
+                    <pre>Ticket  // Updated ticket object</pre>
+                </div>
+            </div>
+
+            <h3 id="ai-insights-endpoints">AI Insights</h3>
+
+            <div class="api-endpoint">
+                <div class="endpoint-method">GET</div>
+                <div class="endpoint-path">/insights</div>
+                <h4>Description</h4>
+                <p>Returns AI-generated insights and analytics</p>
+
+                <h4>Headers</h4>
+                <div class="type-definition">
+                    <pre>Authorization: Bearer {token}  // Required for authentication</pre>
+                </div>
+
+                <h4>Query Parameters</h4>
+                <div class="type-definition">
+                    <pre>{
+    start?: string;  // ISO start date
+    end?: string;    // ISO end date
+}</pre>
+                </div>
+
+                <h4>Response (200 OK)</h4>
+                <div class="type-definition">
+                    <pre>AIInsights  // Insights object</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 id="authentication-authorization">Authentication & Authorization</h2>
+            <p>All API endpoints (except login) require authentication via a bearer token in the Authorization header.</p>
+            <p>Authorization should be role-based:</p>
+            <ul>
+                <li>TESTER: Can create tickets and submit regression tests</li>
+                <li>DEVELOPER: Can view tickets, submit developer reports</li>
+                <li>QA: Can view tickets, submit QA reviews</li>
+                <li>ADMIN: Full access to all functionality</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 id="file-uploads">File Uploads</h2>
+            <p>Endpoints that accept file uploads (ticket creation, developer reports, regression tests) should:</p>
+            <ul>
+                <li>Accept multipart/form-data content type</li>
+                <li>Validate file types (recommended: images only)</li>
+                <li>Limit file sizes (recommended: 5MB max per file)</li>
+                <li>Store files securely with unique filenames</li>
+                <li>Return appropriate URLs/paths for accessing uploaded files</li>
+            </ul>
+        </div>
     </div>
 </body>
 </html>
